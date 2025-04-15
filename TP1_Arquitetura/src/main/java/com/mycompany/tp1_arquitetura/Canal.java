@@ -1,5 +1,7 @@
 package com.mycompany.tp1_arquitetura;
 
+import org.w3c.dom.ls.LSOutput;
+
 import java.util.Random;
 
                             //ATENÇÃO: NÃO MODIFIQUE ESTA CLASSE
@@ -11,6 +13,7 @@ public class Canal {
     private final double probRuido; //probabilidade de gerar erro em 1 único bit
     private final double probMultiplosRuidos; //probabilidade de erro em mais bits (se 0, consideramos a geração de possível apenas em 1 bit)
     private final Random geradorAleatorio = new Random(42);
+
     
     private Transmissor transmissor; //conectado posteriormente para "simular" (poderia suprimir)
     private Receptor receptor; //conectado posteriormente para "simular"
@@ -60,6 +63,7 @@ public class Canal {
         
         for(int ruido = 1; ruido <= qRuido;ruido++){
             //pode gerar um erro ou não..
+            //analisar...
             if(this.geradorAleatorio.nextDouble() < this.probRuido){
                 int indice = this.geradorAleatorio.nextInt(this.bits.length);
                 bits[indice] = !bits[indice];
