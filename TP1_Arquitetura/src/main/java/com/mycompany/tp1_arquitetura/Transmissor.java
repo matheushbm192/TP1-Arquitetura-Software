@@ -57,8 +57,26 @@ public class Transmissor {
         /*sua implementação aqui!!!
         modifique o que precisar neste método
         */
-        
+        boolean[] dados = new boolean[12];
+        boolean[] polinomio = {true,true,false,false,false};
+
+        for(int i = 0; i < 12; i++){
+            if(i <= 8 ){
+                dados[i] = bits[i];
+            }else{
+                dados[i] = false;
+            }
+
+            boolean[] dadoCRC = calcularCRC(dados, polinomio);
+
+        }
+
         return bits;
+    }
+
+    private boolean[] calcularCRC(boolean bitsCRC[], boolean polinomio[]){
+
+        return bitsCRC;
     }
     
     private boolean[] dadoBitsHamming(boolean bits[]){
