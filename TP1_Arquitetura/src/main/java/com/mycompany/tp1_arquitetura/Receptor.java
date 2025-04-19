@@ -6,7 +6,7 @@ public class Receptor {
     private String mensagem;
     private final Estrategia tecnica;
     private final Canal canal;
-
+    private boolean feedback;
     public Receptor(Canal canal, Estrategia tecnica) {
         //mensagem vazia no inicio da execução
         this.mensagem = "";
@@ -38,9 +38,10 @@ public class Receptor {
     }
     
     private boolean[] decoficarDadoCRC(boolean bits[]){
-        
+        boolean[] polinomio = {true,true,false,false,false};
         //implemente a decodificação Hemming aqui e encontre os 
         //erros e faça as devidas correções para ter a imagem correta
+        //implementar feedback nas respostas, se a divisao pelo polinomio der false retorne true, se der true retorne false
         return null;
     }
     
@@ -53,21 +54,23 @@ public class Receptor {
     
     
     //recebe os dados do transmissor
+    //recebe bits por bits
     public void receberDadoBits(){
-        
-        /*if(this.tecnica == Estrategia.CRC){
-            
+
+        if(this.tecnica == Estrategia.CRC){
+            decoficarDadoCRC(this.canal.recebeDado());
         }else{
-            
-        }*/
+            decoficarDadoHammig(this.canal.recebeDado());
+        }
         
         //aqui você deve trocar o médodo decofificarDado para decoficarDadoCRC (implemente!!)
-        decodificarDado(this.canal.recebeDado());
+        //decodificarDado(this.canal.recebeDado());
         
         
         
         //será que sempre teremos sucesso nessa recepção?????
-        this.canal.enviaFeedBack(true);
+        //todo: alterar esse true para o verdadeiro feedback que deve ser retornado pelos descodificadores
+        this.canal.enviaFeedBack(feedback);
     }
     
     //

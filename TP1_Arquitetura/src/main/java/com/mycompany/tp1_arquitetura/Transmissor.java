@@ -8,30 +8,31 @@ public class Transmissor {
     private File arquivo;
     private Estrategia tecnica;
 
+
     public Transmissor(String mensagem, Canal canal, Estrategia tecnica) {
         this.mensagem = mensagem;
         this.canal = canal;
         this.tecnica = tecnica;
     }
     
-    public Transmissor(File arq, Canal canal, Estrategia tecnica) {
-        this.arquivo = arq;
-        this.canal = canal;
-        this.tecnica = tecnica;
-        
-        carregarMensagemArquivo();
-    }
-    
-    private void carregarMensagemArquivo(){
-        /*sua implementação aqui!!!
-        modifique o que precisar neste método para carregar na mensagem 
-        todo o conteúdo do arquivo
-        */
-    }
+//    public Transmissor(File arq, Canal canal, Estrategia tecnica) {
+//        this.arquivo = arq;
+//        this.canal = canal;
+//        this.tecnica = tecnica;
+//
+//        carregarMensagemArquivo();
+//    }
+//
+//    private void carregarMensagemArquivo(){
+//        /*sua implementação aqui!!!
+//        modifique o que precisar neste método para carregar na mensagem
+//        todo o conteúdo do arquivo
+//        */
+//    }
     
     //convertendo um símbolo para "vetor" de boolean (bits)
     private boolean[] streamCaracter(char simbolo){
-        
+
         //cada símbolo da tabela ASCII é representado com 8 bits
         boolean bits[] = new boolean[8];
         
@@ -52,7 +53,7 @@ public class Transmissor {
     } 
     
     private boolean[] dadoBitsCRC(boolean bits[]){
-        
+        //implementar o acrescentar bits aqui
         /*sua implementação aqui!!!
         modifique o que precisar neste método
         */
@@ -70,10 +71,17 @@ public class Transmissor {
     }
     
     public void enviaDado(){
+        //percorre cada letra da mensagem
         for(int i = 0; i < this.mensagem.length();i++){
             do{
+                //Separa os caracteres por index e retorna em bits
                 boolean bits[] = streamCaracter(this.mensagem.charAt(i));
-                
+
+                if(this.tecnica == Estrategia.CRC){
+                    dadoBitsCRC( bits);
+                }else{
+                    dadoBitsHamming(bits);
+                }
                 /*-------AQUI você deve adicionar os bits do códico CRC para contornar os problemas de ruidos
                             você pode modificar o método anterior também
                     boolean bitsCRC[] = dadoBitsCRC(bits);
