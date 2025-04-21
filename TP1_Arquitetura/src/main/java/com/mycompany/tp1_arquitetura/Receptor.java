@@ -37,14 +37,82 @@ public class Receptor {
         return true;
     }
     
-    private boolean[] decoficarDadoCRC(boolean bits[]){
+    private boolean[] decoficarDadoCRC(boolean[] bits){
         boolean[] polinomio = {true,true,false,false,false};
-        //implemente a decodificação Hemming aqui e encontre os 
+
         //erros e faça as devidas correções para ter a imagem correta
         //implementar feedback nas respostas, se a divisao pelo polinomio der false retorne true, se der true retorne false
-        return null;
+
+       return calculoCRC(bits,polinomio);
     }
-    
+
+    private boolean[] calculoCRC(boolean[] bits, boolean[] polinomio ) {
+
+        boolean[] dividendo = adicionarBitsIniciais(bits);
+        boolean[] resultado = new boolean[5];
+        int indexDoTrue;
+        int proximoBit = 5;
+
+        while(true){
+
+            for (int j = 0; j < 5; j++) {
+                if (dividendo[j] != polinomio[j] ){
+                    resultado[j] = true;
+                }else{
+                    resultado[j] = false;
+                }
+            }
+
+            indexDoTrue = cortarZeros(resultado);
+
+            int j = 0;
+            for (int i = indexDoTrue; i < 5; i++,j++) {
+                dividendo[j] = resultado[i];
+            }
+
+            for (int i = 4 - indexDoTrue; i < 5; i++) {
+                dividendo[i] = bits[proximoBit];
+                proximoBit++;
+            }
+            //completar os demais index do dividendo sendo a quantidade de espaços vazios o numero em indexDoTrue
+
+
+            if(proximoBit == 14){
+                feedback = calcularFeedback(dividendo);
+                return dividendo;
+            }
+        }
+
+    }
+
+    private boolean calcularFeedback(boolean[] dividendo) {
+        for (int i = 0; i < dividendo.length; i++) {
+            if(dividendo[i]){
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    private int cortarZeros(boolean[] resultado) {
+        for (int j = 0; j < 5; j++) {
+            if(resultado[j] == true){
+                return j;
+            }
+        }
+        return 0;
+    }
+
+    private boolean[] adicionarBitsIniciais(boolean[] bits) {
+        boolean[] bitsParaDividendo = new boolean[5];
+        for (int i = 0; i < 5; i++) {
+
+            bitsParaDividendo[i] = bits[i];
+        }
+        return bitsParaDividendo;
+    }
+
     private boolean[] decoficarDadoHammig(boolean bits[]){
         
         //implemente a decodificação Hemming aqui e encontre os 
