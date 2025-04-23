@@ -52,40 +52,145 @@ public class Transmissor {
         return bits;
     } 
     
-    private boolean[] dadoBitsCRC(boolean bits[]){
+    private void dadoBitsCRC(boolean bits[]){
         //implementar o acrescentar bits aqui
         /*sua implementação aqui!!!
         modifique o que precisar neste método
         */
-        boolean[] dados = new boolean[12];
+
+        //cria novo array de dados
+        boolean[] dado = new boolean[12];
+        //fixa o polinômio 11000
         boolean[] polinomio = {true,true,false,false,false};
 
+        //adiciona zeros (tamanho do polinomio -1) no dado original
         for(int i = 0; i < 12; i++){
-            if(i <= 8 ){
-                dados[i] = bits[i];
+            if(i < 8 ){
+                dado[i] = bits[i];
             }else{
-                dados[i] = false;
+                dado[i] = false;
+            }
+        }
+        //adiciona CRC ao dado
+        int n = 0;
+        boolean[] restoCRC = calcularCRC(dado, polinomio);
+        boolean[] dadoCRC = new boolean[12];
+        for(int i = 0; i < 12; i++){
+            if(i < 8 ){
+                dadoCRC[i] = bits[i];
+            }else{
+                dadoCRC[i] = restoCRC[n];
+                n++;
+            }
+        }
+        //todo: conferir se é para enviar aqui
+        canal.enviarDado(dadoCRC);
+    }
+
+    private int cortarZeros(boolean[] resultado) {
+        for (int j = 0; j < 5; j++) {
+            if(resultado[j] == true){
+                return j;
+            }
+        }
+        return 0;
+    }
+
+    private boolean[] adicionarBitsIniciais(boolean[] bits) {
+        boolean[] bitsParaDividendo = new boolean[5];
+        for (int i = 0; i < 5; i++) {
+
+            bitsParaDividendo[i] = bits[i];
+        }
+        return bitsParaDividendo;
+    }
+
+    private boolean[] calcularCRC(boolean dado[], boolean polinomio[]){
+
+        boolean[] dividendo = adicionarBitsIniciais(dado);
+        boolean[] resultado = new boolean[5];
+        int indexDoTrue;
+        int proximoBit = 5;
+
+        while(true){
+
+            for (int j = 0; j < 5; j++) {
+                if (dividendo[j] != polinomio[j] ){
+                    resultado[j] = true;
+                }else{
+                    resultado[j] = false;
+                }
             }
 
-            boolean[] dadoCRC = calcularCRC(dados, polinomio);
+            indexDoTrue = cortarZeros(resultado);
 
+            int j = 0;
+            for (int i = indexDoTrue; i < 5; i++,j++) {
+                dividendo[j] = resultado[i];
+            }
+
+            for (int i = 4 - indexDoTrue; i < 5; i++) {
+                dividendo[i] = dado[proximoBit];
+                proximoBit++;
+            }
+
+            if(proximoBit == 14){
+                return dividendo;
+            }
         }
 
-        return bits;
     }
 
-    private boolean[] calcularCRC(boolean bitsCRC[], boolean polinomio[]){
+    /*private boolean[] xor(boolean[] resto, boolean[] polinomio){
+        boolean[] resultado = new boolean[polinomio.length];
 
-        return bitsCRC;
-    }
+        for(int i = 0; i < polinomio.length; i++){
+            resultado[i] = (resto[i] ^ polinomio[i]);
+        }
+        return resultado;
+    }*/
     
-    private boolean[] dadoBitsHamming(boolean bits[]){
-        
-        /*sua implementação aqui!!!
-        modifique o que precisar neste método
-        */
-        
-        return bits;
+    private void dadoBitsHamming(boolean bits[]){
+
+        boolean h1, h2, h3, h4;
+        int n = 0;
+        boolean[] dadoHamming = new boolean[12];
+
+        for(int i = 1; i <= 12; i++){
+            if(i == 1 || i == 2 || i == 4 || i == 8 ){
+                dadoHamming[i-1] = false;
+            }else{
+                dadoHamming[i-1] = bits[n];
+                n++;
+            }
+        }
+
+        //caclulando o XOR das posições
+        h1 = dadoHamming[2] ^ dadoHamming[4];
+        h1 = h1 ^ dadoHamming[6];
+        h1 = h1 ^ dadoHamming[8];
+        h1 = h1 ^ dadoHamming[10];
+
+        h2 = dadoHamming[2] ^ dadoHamming[5];
+        h2 = h2 ^ dadoHamming[6];
+        h2 = h2 ^ dadoHamming[9];
+        h2 = h2 ^ dadoHamming[10];
+
+        h3 = dadoHamming[4] ^ dadoHamming[5];
+        h3 = h3 ^ dadoHamming[6];
+        h3 = h3 ^ dadoHamming[11];
+
+        h4 = dadoHamming[8] ^ dadoHamming[9];
+        h4 = h4 ^ dadoHamming[10];
+        h4 = h4 ^ dadoHamming[11];
+
+        dadoHamming[0] = h1;
+        dadoHamming[1] = h2;
+        dadoHamming[3] = h3;
+        dadoHamming[7] = h4;
+
+        //verificar se o dado será enviado aqui
+        canal.enviarDado(dadoHamming);
     }
     
     public void enviaDado(){
@@ -106,8 +211,9 @@ public class Transmissor {
                 */
 
                 //enviando a mensagem "pela rede" para o receptor (uma forma de testarmos esse método)
-                this.canal.enviarDado(bits);
-            }while(this.canal.recebeFeedback() == false);
+                //this.canal.enviarDado(bits);
+            }
+            while(this.canal.recebeFeedback() == false);
             
             
             

@@ -7,6 +7,7 @@ public class Receptor {
     private final Estrategia tecnica;
     private final Canal canal;
     private boolean feedback;
+
     public Receptor(Canal canal, Estrategia tecnica) {
         //mensagem vazia no inicio da execução
         this.mensagem = "";
@@ -130,12 +131,7 @@ public class Receptor {
         }else{
             decoficarDadoHammig(this.canal.recebeDado());
         }
-        
-        //aqui você deve trocar o médodo decofificarDado para decoficarDadoCRC (implemente!!)
-        //decodificarDado(this.canal.recebeDado());
-        
-        
-        
+
         //será que sempre teremos sucesso nessa recepção?????
         //todo: alterar esse true para o verdadeiro feedback que deve ser retornado pelos descodificadores
         this.canal.enviaFeedBack(feedback);
