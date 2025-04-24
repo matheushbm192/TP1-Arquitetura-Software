@@ -52,7 +52,7 @@ public class Transmissor {
         return bits;
     } 
     
-    private void dadoBitsCRC(boolean bits[]){
+    private boolean[] dadoBitsCRC(boolean[] bits){
         //implementar o acrescentar bits aqui
         /*sua implementação aqui!!!
         modifique o que precisar neste método
@@ -84,7 +84,7 @@ public class Transmissor {
             }
         }
         //todo: conferir se é para enviar aqui
-        canal.enviarDado(dadoCRC);
+        return dadoCRC;
     }
 
     private int cortarZeros(boolean[] resultado) {
@@ -105,7 +105,7 @@ public class Transmissor {
         return bitsParaDividendo;
     }
 
-    private boolean[] calcularCRC(boolean dado[], boolean polinomio[]){
+    private boolean[] calcularCRC(boolean[] dado, boolean[] polinomio){
 
         boolean[] dividendo = adicionarBitsIniciais(dado);
         boolean[] resultado = new boolean[5];
@@ -129,12 +129,12 @@ public class Transmissor {
                 dividendo[j] = resultado[i];
             }
 
-            for (int i = 4 - indexDoTrue; i < 5; i++) {
+            for (int i = 5 - indexDoTrue; i < 5; i++) {
                 dividendo[i] = dado[proximoBit];
                 proximoBit++;
             }
 
-            if(proximoBit == 14){
+            if(proximoBit == 12){
                 return dividendo;
             }
         }
@@ -150,7 +150,7 @@ public class Transmissor {
         return resultado;
     }*/
     
-    private void dadoBitsHamming(boolean bits[]){
+    private boolean[] dadoBitsHamming(boolean[] bits){
 
         boolean h1, h2, h3, h4;
         int n = 0;
@@ -189,29 +189,33 @@ public class Transmissor {
         dadoHamming[3] = h3;
         dadoHamming[7] = h4;
 
-        //verificar se o dado será enviado aqui
-        canal.enviarDado(dadoHamming);
+        return dadoHamming;
     }
     
     public void enviaDado(){
+        boolean[] dado;
         //percorre cada letra da mensagem
+
         for(int i = 0; i < this.mensagem.length();i++){
             do{
                 //Separa os caracteres por index e retorna em bits
-                boolean bits[] = streamCaracter(this.mensagem.charAt(i));
+                boolean[] bits = streamCaracter(this.mensagem.charAt(i));
 
                 if(this.tecnica == Estrategia.CRC){
-                    dadoBitsCRC( bits);
+                  dado =  dadoBitsCRC(bits);
                 }else{
-                    dadoBitsHamming(bits);
+                  dado =  dadoBitsHamming(bits);
                 }
                 /*-------AQUI você deve adicionar os bits do códico CRC para contornar os problemas de ruidos
                             você pode modificar o método anterior também
                     boolean bitsCRC[] = dadoBitsCRC(bits);
                 */
+                int j = 0;
+                j++;
+                System.err.println(j);
 
                 //enviando a mensagem "pela rede" para o receptor (uma forma de testarmos esse método)
-                //this.canal.enviarDado(bits);
+                this.canal.enviarDado(dado);
             }
             while(this.canal.recebeFeedback() == false);
             

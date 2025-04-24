@@ -5,7 +5,7 @@ public class TP1_Arquitetura {
     public static void main(String[] args) {
         
         //é necessário modificar as probabilidades e avaliar o desempenho
-        Canal canal = new Canal(0.1, 0.0);
+        Canal canal = new Canal(0.0, 0.0);
         
         Transmissor transm = new Transmissor("Teste:?*/", canal, Estrategia.CRC);
         //é necessário modificar a estratégia e avaliar o desempenho

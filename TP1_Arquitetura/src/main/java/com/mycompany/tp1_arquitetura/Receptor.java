@@ -19,7 +19,7 @@ public class Receptor {
         return mensagem;
     }
  
-    private boolean decodificarDado(boolean bits[]){
+    private boolean decodificarDado(boolean[] bits){
         int codigoAscii = 0;
         int expoente = bits.length-1;
         
@@ -46,7 +46,17 @@ public class Receptor {
 
        return calculoCRC(bits,polinomio);
     }
+    private boolean[] calculoXor(boolean[] dividendo,boolean[] polinomio,boolean[] resultado){
 
+        for (int j = 0; j < 5; j++) {
+            if (dividendo[j] != polinomio[j] ){
+                resultado[j] = true;
+            }else{
+                resultado[j] = false;
+            }
+        }
+        return resultado;
+    }
     private boolean[] calculoCRC(boolean[] bits, boolean[] polinomio ) {
 
         boolean[] dividendo = adicionarBitsIniciais(bits);
@@ -56,31 +66,31 @@ public class Receptor {
 
         while(true){
 
-            for (int j = 0; j < 5; j++) {
-                if (dividendo[j] != polinomio[j] ){
-                    resultado[j] = true;
-                }else{
-                    resultado[j] = false;
-                }
-            }
+            resultado = calculoXor(dividendo,polinomio,resultado);
 
             indexDoTrue = cortarZeros(resultado);
 
             int j = 0;
             for (int i = indexDoTrue; i < 5; i++,j++) {
+
                 dividendo[j] = resultado[i];
             }
 
-            for (int i = 4 - indexDoTrue; i < 5; i++) {
+            for (int i = 5 - indexDoTrue; i < 5; i++) {
+                if(proximoBit == 12){
+
+                    break;
+                }
                 dividendo[i] = bits[proximoBit];
                 proximoBit++;
             }
             //completar os demais index do dividendo sendo a quantidade de espaços vazios o numero em indexDoTrue
 
 
-            if(proximoBit == 14){
+            if(proximoBit == 12){
+                dividendo = calculoXor(dividendo,polinomio,resultado);
                 feedback = calcularFeedback(dividendo);
-                return dividendo;
+                return bits;
             }
         }
 
@@ -88,7 +98,7 @@ public class Receptor {
 
     private boolean calcularFeedback(boolean[] dividendo) {
         for (int i = 0; i < dividendo.length; i++) {
-            if(dividendo[i]){
+            if(dividendo[i] == true){
                 return false;
             }
         }
@@ -125,13 +135,15 @@ public class Receptor {
     //recebe os dados do transmissor
     //recebe bits por bits
     public void receberDadoBits(){
-
+        boolean[] dado;
         if(this.tecnica == Estrategia.CRC){
-            decoficarDadoCRC(this.canal.recebeDado());
+           dado = decoficarDadoCRC(this.canal.recebeDado());
         }else{
-            decoficarDadoHammig(this.canal.recebeDado());
+           dado =  decoficarDadoHammig(this.canal.recebeDado());
         }
 
+        decodificarDado(dado);
+        System.out.print(this.mensagem);
         //será que sempre teremos sucesso nessa recepção?????
         //todo: alterar esse true para o verdadeiro feedback que deve ser retornado pelos descodificadores
         this.canal.enviaFeedBack(feedback);
