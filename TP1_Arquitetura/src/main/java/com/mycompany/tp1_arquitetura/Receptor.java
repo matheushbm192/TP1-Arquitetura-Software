@@ -89,14 +89,14 @@ public class Receptor {
 
             if(proximoBit == 12){
                 dividendo = calculoXor(dividendo,polinomio,resultado);
-                feedback = calcularFeedback(dividendo);
+                feedback = calcularFeedbackCRC(dividendo);
                 return bits;
             }
         }
 
     }
 
-    private boolean calcularFeedback(boolean[] dividendo) {
+    private boolean calcularFeedbackCRC(boolean[] dividendo) {
         for (int i = 0; i < dividendo.length; i++) {
             if(dividendo[i] == true){
                 return false;
@@ -124,11 +124,67 @@ public class Receptor {
         return bitsParaDividendo;
     }
 
-    private boolean[] decoficarDadoHammig(boolean bits[]){
-        
-        //implemente a decodificação Hemming aqui e encontre os 
-        //erros e faça as devidas correções para ter a imagem correta
-        return null;
+    private boolean[] decoficarDadoHammig(boolean dadoHamming[]){
+        boolean h1, h2, h3, h4;
+        boolean[] resultado = new boolean[4];
+        int contaErros = 0;
+        //caclulando o XOR das posições
+        h1 = dadoHamming[0] ^ dadoHamming[2];
+        h1 = h1 ^ dadoHamming[4];
+        h1 = h1 ^ dadoHamming[6];
+        h1 = h1 ^ dadoHamming[8];
+        h1 = h1 ^ dadoHamming[10];
+        resultado[3] = h1;
+
+        h2 = dadoHamming[1] ^ dadoHamming[2];
+        h2 = h2 ^ dadoHamming[5];
+        h2 = h2 ^ dadoHamming[6];
+        h2 = h2 ^ dadoHamming[9];
+        h2 = h2 ^ dadoHamming[10];
+        resultado[2] = h2;
+
+        h3 = dadoHamming[3] ^ dadoHamming[4];
+        h3 = h3 ^ dadoHamming[5];
+        h3 = h3 ^ dadoHamming[6];
+        h3 = h3 ^ dadoHamming[11];
+        resultado[1] = h3;
+
+        h4 = dadoHamming[7] ^ dadoHamming[8];
+        h4 = h4 ^ dadoHamming[9];
+        h4 = h4 ^ dadoHamming[10];
+        h4 = h4 ^ dadoHamming[11];
+        resultado[0] = h4;
+
+
+
+        if(h1 || h2 || h3 || h4){
+            if(contaErros == 0) {
+                int posicaoErro = 0;
+                for (int i = 0; i < 4; i++) {
+                    if (resultado[i]) {
+                        posicaoErro += Math.pow(2, i);
+                    }
+                }
+                if (posicaoErro > 0 && posicaoErro <= dadoHamming.length) {
+                    dadoHamming[posicaoErro - 1] = !dadoHamming[posicaoErro - 1];
+                    contaErros++;
+                    decoficarDadoCRC(dadoHamming);
+                }
+            }
+        }
+
+        boolean[] dadoOriginal = new boolean[8];
+
+        int n = 0;
+        for(int i = 0; i < 12; i++){
+            if (i != 0 && i != 1 && i != 3 && i != 7) {
+                dadoOriginal[n] = dadoHamming[i];
+                n++;
+            }
+        }
+
+        feedback = true;
+        return dadoOriginal;
     }
     
     
@@ -139,11 +195,10 @@ public class Receptor {
         if(this.tecnica == Estrategia.CRC){
            dado = decoficarDadoCRC(this.canal.recebeDado());
         }else{
-           dado =  decoficarDadoHammig(this.canal.recebeDado());
+           dado = decoficarDadoHammig(this.canal.recebeDado());
         }
 
         decodificarDado(dado);
-        System.out.print(this.mensagem);
         //será que sempre teremos sucesso nessa recepção?????
         //todo: alterar esse true para o verdadeiro feedback que deve ser retornado pelos descodificadores
         this.canal.enviaFeedBack(feedback);

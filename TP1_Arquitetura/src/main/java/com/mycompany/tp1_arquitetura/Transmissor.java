@@ -83,7 +83,6 @@ public class Transmissor {
                 n++;
             }
         }
-        //todo: conferir se é para enviar aqui
         return dadoCRC;
     }
 
@@ -149,6 +148,7 @@ public class Transmissor {
         }
         return resultado;
     }*/
+
     
     private boolean[] dadoBitsHamming(boolean[] bits){
 
@@ -194,8 +194,8 @@ public class Transmissor {
     
     public void enviaDado(){
         boolean[] dado;
-        //percorre cada letra da mensagem
 
+        //percorre cada letra da mensagem
         for(int i = 0; i < this.mensagem.length();i++){
             do{
                 //Separa os caracteres por index e retorna em bits
@@ -206,21 +206,14 @@ public class Transmissor {
                 }else{
                   dado =  dadoBitsHamming(bits);
                 }
-                /*-------AQUI você deve adicionar os bits do códico CRC para contornar os problemas de ruidos
-                            você pode modificar o método anterior também
-                    boolean bitsCRC[] = dadoBitsCRC(bits);
-                */
-                int j = 0;
-                j++;
-                System.err.println(j);
 
                 //enviando a mensagem "pela rede" para o receptor (uma forma de testarmos esse método)
                 this.canal.enviarDado(dado);
             }
             while(this.canal.recebeFeedback() == false);
-            
-            
-            
+
+
+
             //o que faremos com o indicador quando houver algum erro? qual ação vamos tomar com o retorno do receptor
         }
     }
