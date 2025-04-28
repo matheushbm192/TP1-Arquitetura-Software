@@ -1,6 +1,6 @@
 package com.mycompany.tp1_arquitetura;
 
-import java.io.File;
+import java.io.*;
 
 public class Transmissor {
     private String mensagem;
@@ -15,20 +15,26 @@ public class Transmissor {
         this.tecnica = tecnica;
     }
     
-//    public Transmissor(File arq, Canal canal, Estrategia tecnica) {
-//        this.arquivo = arq;
-//        this.canal = canal;
-//        this.tecnica = tecnica;
-//
-//        carregarMensagemArquivo();
-//    }
-//
-//    private void carregarMensagemArquivo(){
-//        /*sua implementação aqui!!!
-//        modifique o que precisar neste método para carregar na mensagem
-//        todo o conteúdo do arquivo
-//        */
-//    }
+    public Transmissor(File arq, Canal canal, Estrategia tecnica) {
+        this.arquivo = arq;
+        this.canal = canal;
+        this.tecnica = tecnica;
+
+        carregarMensagemArquivo();
+    }
+
+    private void carregarMensagemArquivo(){
+        try(BufferedReader buffer = new BufferedReader(new FileReader(this.arquivo))){
+            String mesagem;
+            while((mensagem = buffer.readLine()) != null){
+                this.mensagem += mensagem + "\n";
+            }
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
     
     //convertendo um símbolo para "vetor" de boolean (bits)
     private boolean[] streamCaracter(char simbolo){
@@ -193,6 +199,7 @@ public class Transmissor {
     }
     
     public void enviaDado(){
+
         boolean[] dado;
 
         //percorre cada letra da mensagem
@@ -211,9 +218,6 @@ public class Transmissor {
                 this.canal.enviarDado(dado);
             }
             while(this.canal.recebeFeedback() == false);
-
-
-
             //o que faremos com o indicador quando houver algum erro? qual ação vamos tomar com o retorno do receptor
         }
     }
