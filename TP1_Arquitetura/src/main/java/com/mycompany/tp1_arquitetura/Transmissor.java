@@ -24,22 +24,24 @@ public class Transmissor {
     }
 
     private void carregarMensagemArquivo(){
+        this.mensagem = "";
         try(BufferedReader buffer = new BufferedReader(new FileReader(this.arquivo))){
-            String mesagem;
-            while((mensagem = buffer.readLine()) != null){
-                this.mensagem += mensagem + "\n";
+            String linha;
+            while((linha = buffer.readLine()) != null){
+                this.mensagem += linha + "\n";
             }
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
     }
     
     //convertendo um símbolo para "vetor" de boolean (bits)
     private boolean[] streamCaracter(char simbolo){
 
-        //cada símbolo da tabela ASCII é representado com 8 bits
+        /*//cada símbolo da tabela ASCII é representado com 8 bits
         boolean bits[] = new boolean[8];
         
         //convertendo um char para int (encontramos o valor do mesmo na tabela ASCII)
@@ -55,7 +57,22 @@ public class Transmissor {
         }
         bits[indice] = (valorSimbolo == 1);
         
+        return bits;*/
+
+        boolean[] bits = new boolean[8];
+        int valorSimbolo = (int) simbolo;
+
+        if (valorSimbolo > 255) {
+            valorSimbolo = 0; // pode representar quebra de linha, como você fez
+        }
+
+        for (int i = 7; i >= 0; i--) {
+            bits[i] = (valorSimbolo % 2 == 1);
+            valorSimbolo /= 2;
+        }
+
         return bits;
+
     } 
     
     private boolean[] dadoBitsCRC(boolean[] bits){
@@ -199,6 +216,8 @@ public class Transmissor {
     }
     
     public void enviaDado(){
+
+        System.out.println("Enviando dado...");
 
         boolean[] dado;
 

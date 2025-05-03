@@ -24,7 +24,7 @@ public class Receptor {
         return mensagem;
     }
 
-    private boolean decodificarDado(boolean[] bits) {
+    private char decodificarDado(boolean[] bits) {
         int codigoAscii = 0;
         int expoente = bits.length - 1;
 
@@ -40,7 +40,7 @@ public class Receptor {
         this.mensagem += (char) codigoAscii;
 
         //esse retorno precisa ser pensado... será que o dado sempre chega sem ruído???
-        return true;
+        return (char) codigoAscii;
     }
 
     private boolean[] decoficarDadoCRC(boolean[] bits) {
@@ -134,6 +134,7 @@ public class Receptor {
     int contaErros = 0;
 
     private boolean[] decoficarDadoHammig(boolean dadoHamming[]) {
+        System.out.println("Decodificando dado");
         boolean h1, h2, h3, h4;
         boolean[] resultado = new boolean[4];
 
@@ -176,14 +177,15 @@ public class Receptor {
                         posicaoErro += Math.pow(2, i);
                     }
                 }
+                System.out.println("Erro na posição " + posicaoErro + ". Consertando...");
                 if (posicaoErro > 0 && posicaoErro <= dadoHamming.length) {
                     dadoHamming[posicaoErro - 1] = !dadoHamming[posicaoErro - 1];
                     contaErros++;
-                    decoficarDadoCRC(dadoHamming);
+                    decoficarDadoHammig(dadoHamming);
                 }
             } else {
-                System.out.println("Erro em mais de um bit. Enviar dado novamente.");
-                //chamar função que envia dado novamente;
+                feedback = false;
+                return null;
             }
         }
 
@@ -206,22 +208,30 @@ public class Receptor {
     //recebe bits por bits
     public void receberDadoBits() {
         boolean[] dado;
+        char letra = ' ';
         if (this.tecnica == Estrategia.CRC) {
             dado = decoficarDadoCRC(this.canal.recebeDado());
         } else {
             dado = decoficarDadoHammig(this.canal.recebeDado());
         }
+        if(dado != null){
+           letra = decodificarDado(dado);
+        }
 
-        decodificarDado(dado);
-        //será que sempre teremos sucesso nessa recepção?
-        //todo: alterar esse true para o verdadeiro feedback que deve ser retornado pelos descodificadores
-        this.canal.enviaFeedBack(feedback);
+        if(feedback){
+            gravaMensArquivo(letra);
+        }
+            //será que sempre teremos sucesso nessa recepção?
+        System.out.println("Recebendo dados");
+            //todo: alterar esse true para o verdadeiro feedback que deve ser retornado pelos descodificadores
+            this.canal.enviaFeedBack(feedback);
+
     }
 
-    //
-    public void gravaMensArquivo() {
-        try (BufferedWriter escritor = new BufferedWriter(new FileWriter("C:\\Users\\paola\\OneDrive\\Desktop\\TesteTP1"))) {
-            escritor.write(this.mensagem);
+
+    public void gravaMensArquivo(char letra) {
+        try (BufferedWriter escritor = new BufferedWriter(new FileWriter("Resouces/CopiaMobyDick.txt",true))) {
+            escritor.write(letra);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

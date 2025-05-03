@@ -11,7 +11,7 @@ public class TP1_Arquitetura {
 
         File arquivo = new File("C:\\Users\\paola\\IdeaProjects\\TP1-Arquitetura-Software\\Moby Dick.txt");
         
-        //Transmissor transm = new Transmissor("Teste:?*/", canal, Estrategia.HAMMING);
+        //Transmissor transm = new Transmissor("Teste:?*/ttttteeeee", canal, Estrategia.HAMMING);
         Transmissor transm = new Transmissor(arquivo, canal,  Estrategia.HAMMING);
         Receptor receber = new Receptor(canal, Estrategia.HAMMING);
         
