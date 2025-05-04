@@ -1,15 +1,15 @@
 package com.mycompany.tp1_arquitetura;
 
 import java.io.*;
-import java.util.Arrays;
 
+    //Atributos
 public class Transmissor {
     private String mensagem;
     private Canal canal;
     private File arquivo;
     private Estrategia tecnica;
 
-
+    //construtores
     public Transmissor(String mensagem, Canal canal, Estrategia tecnica) {
         this.mensagem = mensagem;
         this.canal = canal;
@@ -21,11 +21,14 @@ public class Transmissor {
         this.canal = canal;
         this.tecnica = tecnica;
 
+        //chama função que carrega mensagem do arquivo
         carregarMensagemArquivo();
     }
 
     private void carregarMensagemArquivo() {
+        //atribui a mesnagem como vazia
         this.mensagem = "";
+        //lê linha por linha do arquivo
         try (BufferedReader buffer = new BufferedReader(new FileReader(this.arquivo))) {
             String linha;
             while ((linha = buffer.readLine()) != null) {
@@ -41,24 +44,6 @@ public class Transmissor {
 
     //convertendo um símbolo para "vetor" de boolean (bits)
     private boolean[] streamCaracter(char simbolo) {
-
-        /*//cada símbolo da tabela ASCII é representado com 8 bits
-        boolean bits[] = new boolean[8];
-        
-        //convertendo um char para int (encontramos o valor do mesmo na tabela ASCII)
-        int valorSimbolo = (int) simbolo;
-        int indice = 7;
-        
-        //convertendo cada "bits" do valor da tabela ASCII
-        while(valorSimbolo >= 2){
-            int resto = valorSimbolo % 2;
-            valorSimbolo /= 2;
-            bits[indice] = (resto == 1);
-            indice--;
-        }
-        bits[indice] = (valorSimbolo == 1);
-        
-        return bits;*/
 
         boolean[] bits = new boolean[8];
         int valorSimbolo = (int) simbolo;
@@ -76,13 +61,15 @@ public class Transmissor {
 
     }
 
-
+    //codifica o dado com código de hamming
     private boolean[] dadoBitsHamming(boolean[] bits) {
 
         boolean h1, h2, h3, h4;
         int n = 0;
+        //cria novo vetor com 12 posições
         boolean[] dadoHamming = new boolean[12];
 
+        //Insere bits de paridade nas posições 1,2,4, e 8
         for (int i = 1; i <= 12; i++) {
             if (i == 1 || i == 2 || i == 4 || i == 8) {
                 dadoHamming[i - 1] = false;
@@ -111,11 +98,13 @@ public class Transmissor {
         h4 = h4 ^ dadoHamming[10];
         h4 = h4 ^ dadoHamming[11];
 
+        //posiciona os bits de paridade nos índices apropriados
         dadoHamming[0] = h1;
         dadoHamming[1] = h2;
         dadoHamming[3] = h3;
         dadoHamming[7] = h4;
 
+        //retorna dado codificado
         return dadoHamming;
     }
 
@@ -123,6 +112,7 @@ public class Transmissor {
 
         System.out.println("Enviando dado...");
 
+        //cria vetor que armazenará o dado
         boolean[] dado;
 
         //percorre cada letra da mensagem

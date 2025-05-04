@@ -192,7 +192,7 @@ public class Receptor {
 
 
     public void gravaMensArquivo() {
-        try (BufferedWriter escritor = new BufferedWriter(new FileWriter("Resouces/CopiaMobyDick.txt",true))) {
+        try (BufferedWriter escritor = new BufferedWriter(new FileWriter("TP1_Arquitetura/src/main/resources/Moby Dick Rescrito.txt",true))) {
             escritor.write(buffer.toString());
         } catch (IOException e) {
             throw new RuntimeException(e);
