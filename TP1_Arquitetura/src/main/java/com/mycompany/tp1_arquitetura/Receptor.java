@@ -12,6 +12,7 @@ public class Receptor {
     private final Estrategia tecnica;
     private final Canal canal;
     private boolean feedback;
+    private StringBuilder buffer = new StringBuilder();
 
     public Receptor(Canal canal, Estrategia tecnica) {
         //mensagem vazia no inicio da execução
@@ -45,6 +46,10 @@ public class Receptor {
 
     private boolean[] decodificarDadoCRC(boolean[] bits) {
         boolean[] polinomio = {true, true, false, false, false};
+
+        //erros e faça as devidas correções para ter a imagem correta
+        //implementar feedback nas respostas, se a divisao pelo polinomio der false retorne true, se der true retorne false
+
         return calculoCRC(bits, polinomio);
     }
 
@@ -175,8 +180,8 @@ public class Receptor {
             letra = decodificarDado(dado);
         }
 
-        if(feedback){
-            gravaMensArquivo(letra);
+        if (feedback) {
+            buffer.append(letra);
         }
             //será que sempre teremos sucesso nessa recepção?
         System.out.println("Recebendo dados");
@@ -186,9 +191,9 @@ public class Receptor {
     }
 
 
-    public void gravaMensArquivo(char letra) {
-        try (BufferedWriter escritor = new BufferedWriter(new FileWriter("TP1_Arquitetura/src/main/resources/Moby Dick Rescrito.txt",true))) {
-            escritor.write(letra);
+    public void gravaMensArquivo() {
+        try (BufferedWriter escritor = new BufferedWriter(new FileWriter("Resouces/CopiaMobyDick.txt",true))) {
+            escritor.write(buffer.toString());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

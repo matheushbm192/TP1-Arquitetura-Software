@@ -7,13 +7,13 @@ public class TP1_Arquitetura {
     public static void main(String[] args) {
         
         //é necessário modificar as probabilidades e avaliar o desempenho
-        Canal canal = new Canal(0.1);
+        Canal canal = new Canal(0.0);
 
-        File arquivo = new File("TP1_Arquitetura/src/main/resources/historia_10000_caracteres.txt");
+        File arquivo = new File("C:\\Users\\paola\\IdeaProjects\\TP1-Arquitetura-Software\\Livro teste.txt");
         
-        //Transmissor transm = new Transmissor("Teste:?*/", canal, Estrategia.CRC);
-       Transmissor transm = new Transmissor(arquivo, canal,  Estrategia.CRC);
-        Receptor receber = new Receptor(canal, Estrategia.CRC);
+        //Transmissor transm = new Transmissor("Teste:?*/", canal, Estrategia.HAMMING);
+        Transmissor transm = new Transmissor(arquivo, canal,  Estrategia.HAMMING);
+        Receptor receber = new Receptor(canal, Estrategia.HAMMING);
         
         canal.conectaTransmissor(transm);
         canal.conectaReceptor(receber);
@@ -25,7 +25,7 @@ public class TP1_Arquitetura {
 
         System.out.println("Arquivo copiado com sucesso!");
         System.out.println("Tempo total: " + (tempoF - tempoI));
-        
+        receber.gravaMensArquivo();
 
     }
 }
