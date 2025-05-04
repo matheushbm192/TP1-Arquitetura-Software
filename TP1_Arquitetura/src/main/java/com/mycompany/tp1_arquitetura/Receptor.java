@@ -43,93 +43,50 @@ public class Receptor {
         return (char) codigoAscii;
     }
 
-    private boolean[] decoficarDadoCRC(boolean[] bits) {
+    private boolean[] decodificarDadoCRC(boolean[] bits) {
         boolean[] polinomio = {true, true, false, false, false};
-
-        //erros e faça as devidas correções para ter a imagem correta
-        //implementar feedback nas respostas, se a divisao pelo polinomio der false retorne true, se der true retorne false
-
         return calculoCRC(bits, polinomio);
     }
 
-    private boolean[] calculoXor(boolean[] dividendo, boolean[] polinomio, boolean[] resultado) {
-
-        for (int j = 0; j < 5; j++) {
-            if (dividendo[j] != polinomio[j]) {
-                resultado[j] = true;
-            } else {
-                resultado[j] = false;
-            }
-        }
-        return resultado;
-    }
-
     private boolean[] calculoCRC(boolean[] bits, boolean[] polinomio) {
+        boolean[] registrador = new boolean[5];
 
-        boolean[] dividendo = adicionarBitsIniciais(bits);
-        boolean[] resultado = new boolean[5];
-        int indexDoTrue;
-        int proximoBit = 5;
-
-        while (true) {
-
-            resultado = calculoXor(dividendo, polinomio, resultado);
-
-            indexDoTrue = cortarZeros(resultado);
-
-            int j = 0;
-            for (int i = indexDoTrue; i < 5; i++, j++) {
-
-                dividendo[j] = resultado[i];
+        for (int i = 0; i < 12; i++) {
+            // desloca para a esquerda
+            for (int j = 0; j < 4; j++) {
+                registrador[j] = registrador[j + 1];
             }
 
-            for (int i = 5 - indexDoTrue; i < 5; i++) {
-                if (proximoBit == 12) {
+            // adiciona o próximo bit da sequência
+            registrador[4] = bits[i];
 
-                    break;
+            // se MSB for 1, faz XOR com polinômio
+            if (registrador[0]) {
+                for (int j = 0; j < 5; j++) {
+                    registrador[j] ^= polinomio[j];
                 }
-                dividendo[i] = bits[proximoBit];
-                proximoBit++;
-            }
-            //completar os demais index do dividendo sendo a quantidade de espaços vazios o numero em indexDoTrue
-
-
-            if (proximoBit == 12) {
-                dividendo = calculoXor(dividendo, polinomio, resultado);
-                feedback = calcularFeedbackCRC(dividendo);
-                return bits;
             }
         }
 
+        // Verifica se o registrador tem todos os bits zerados (sem erro)
+        feedback = calcularFeedbackCRC(registrador);
+
+        // Retorna os 8 bits originais
+        boolean[] bitsOriginais = new boolean[8];
+        System.arraycopy(bits, 0, bitsOriginais, 0, 8);
+        return bitsOriginais;
     }
+
 
     private boolean calcularFeedbackCRC(boolean[] dividendo) {
-        for (int i = 0; i < dividendo.length; i++) {
-            if (dividendo[i] == true) {
+        for (boolean bit : dividendo) {
+            if (bit) {
                 return false;
             }
         }
         return true;
     }
 
-
-    private int cortarZeros(boolean[] resultado) {
-        for (int j = 0; j < 5; j++) {
-            if (resultado[j] == true) {
-                return j;
-            }
-        }
-        return 0;
-    }
-
-    private boolean[] adicionarBitsIniciais(boolean[] bits) {
-        boolean[] bitsParaDividendo = new boolean[5];
-        for (int i = 0; i < 5; i++) {
-
-            bitsParaDividendo[i] = bits[i];
-        }
-        return bitsParaDividendo;
-    }
 
     int contaErros = 0;
 
@@ -210,7 +167,7 @@ public class Receptor {
         boolean[] dado;
         char letra = ' ';
         if (this.tecnica == Estrategia.CRC) {
-            dado = decoficarDadoCRC(this.canal.recebeDado());
+            dado = decodificarDadoCRC(this.canal.recebeDado());
         } else {
             dado = decoficarDadoHammig(this.canal.recebeDado());
         }
@@ -230,7 +187,7 @@ public class Receptor {
 
 
     public void gravaMensArquivo(char letra) {
-        try (BufferedWriter escritor = new BufferedWriter(new FileWriter("Resouces/CopiaMobyDick.txt",true))) {
+        try (BufferedWriter escritor = new BufferedWriter(new FileWriter("TP1_Arquitetura/src/main/resources/Moby Dick Rescrito.txt",true))) {
             escritor.write(letra);
         } catch (IOException e) {
             throw new RuntimeException(e);

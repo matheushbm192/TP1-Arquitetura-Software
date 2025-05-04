@@ -9,11 +9,11 @@ public class TP1_Arquitetura {
         //é necessário modificar as probabilidades e avaliar o desempenho
         Canal canal = new Canal(0.1);
 
-        File arquivo = new File("C:\\Users\\paola\\IdeaProjects\\TP1-Arquitetura-Software\\Livro teste.txt");
+        File arquivo = new File("TP1_Arquitetura/src/main/resources/Moby Dick.txt");
         
-        //Transmissor transm = new Transmissor("Teste:?*/", canal, Estrategia.HAMMING);
-        Transmissor transm = new Transmissor(arquivo, canal,  Estrategia.HAMMING);
-        Receptor receber = new Receptor(canal, Estrategia.HAMMING);
+        //Transmissor transm = new Transmissor("Teste:?*/", canal, Estrategia.CRC);
+       Transmissor transm = new Transmissor(arquivo, canal,  Estrategia.CRC);
+        Receptor receber = new Receptor(canal, Estrategia.CRC);
         
         canal.conectaTransmissor(transm);
         canal.conectaReceptor(receber);

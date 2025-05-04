@@ -1,6 +1,7 @@
 package com.mycompany.tp1_arquitetura;
 
 import java.io.*;
+import java.util.Arrays;
 
 public class Transmissor {
     private String mensagem;
@@ -14,7 +15,7 @@ public class Transmissor {
         this.canal = canal;
         this.tecnica = tecnica;
     }
-    
+
     public Transmissor(File arq, Canal canal, Estrategia tecnica) {
         this.arquivo = arq;
         this.canal = canal;
@@ -23,11 +24,11 @@ public class Transmissor {
         carregarMensagemArquivo();
     }
 
-    private void carregarMensagemArquivo(){
+    private void carregarMensagemArquivo() {
         this.mensagem = "";
-        try(BufferedReader buffer = new BufferedReader(new FileReader(this.arquivo))){
+        try (BufferedReader buffer = new BufferedReader(new FileReader(this.arquivo))) {
             String linha;
-            while((linha = buffer.readLine()) != null){
+            while ((linha = buffer.readLine()) != null) {
                 this.mensagem += linha + "\n";
             }
         } catch (FileNotFoundException e) {
@@ -37,9 +38,9 @@ public class Transmissor {
         }
 
     }
-    
+
     //convertendo um símbolo para "vetor" de boolean (bits)
-    private boolean[] streamCaracter(char simbolo){
+    private boolean[] streamCaracter(char simbolo) {
 
         /*//cada símbolo da tabela ASCII é representado com 8 bits
         boolean bits[] = new boolean[8];
@@ -73,117 +74,20 @@ public class Transmissor {
 
         return bits;
 
-    } 
-    
-    private boolean[] dadoBitsCRC(boolean[] bits){
-        //implementar o acrescentar bits aqui
-        /*sua implementação aqui!!!
-        modifique o que precisar neste método
-        */
-
-        //cria novo array de dados
-        boolean[] dado = new boolean[12];
-        //fixa o polinômio 11000
-        boolean[] polinomio = {true,true,false,false,false};
-
-        //adiciona zeros (tamanho do polinomio -1) no dado original
-        for(int i = 0; i < 12; i++){
-            if(i < 8 ){
-                dado[i] = bits[i];
-            }else{
-                dado[i] = false;
-            }
-        }
-        //adiciona CRC ao dado
-        int n = 0;
-        boolean[] restoCRC = calcularCRC(dado, polinomio);
-        boolean[] dadoCRC = new boolean[12];
-        for(int i = 0; i < 12; i++){
-            if(i < 8 ){
-                dadoCRC[i] = bits[i];
-            }else{
-                dadoCRC[i] = restoCRC[n];
-                n++;
-            }
-        }
-        return dadoCRC;
     }
 
-    private int cortarZeros(boolean[] resultado) {
-        for (int j = 0; j < 5; j++) {
-            if(resultado[j] == true){
-                return j;
-            }
-        }
-        return 0;
-    }
 
-    private boolean[] adicionarBitsIniciais(boolean[] bits) {
-        boolean[] bitsParaDividendo = new boolean[5];
-        for (int i = 0; i < 5; i++) {
-
-            bitsParaDividendo[i] = bits[i];
-        }
-        return bitsParaDividendo;
-    }
-
-    private boolean[] calcularCRC(boolean[] dado, boolean[] polinomio){
-
-        boolean[] dividendo = adicionarBitsIniciais(dado);
-        boolean[] resultado = new boolean[5];
-        int indexDoTrue;
-        int proximoBit = 5;
-
-        while(true){
-
-            for (int j = 0; j < 5; j++) {
-                if (dividendo[j] != polinomio[j] ){
-                    resultado[j] = true;
-                }else{
-                    resultado[j] = false;
-                }
-            }
-
-            indexDoTrue = cortarZeros(resultado);
-
-            int j = 0;
-            for (int i = indexDoTrue; i < 5; i++,j++) {
-                dividendo[j] = resultado[i];
-            }
-
-            for (int i = 5 - indexDoTrue; i < 5; i++) {
-                dividendo[i] = dado[proximoBit];
-                proximoBit++;
-            }
-
-            if(proximoBit == 12){
-                return dividendo;
-            }
-        }
-
-    }
-
-    /*private boolean[] xor(boolean[] resto, boolean[] polinomio){
-        boolean[] resultado = new boolean[polinomio.length];
-
-        for(int i = 0; i < polinomio.length; i++){
-            resultado[i] = (resto[i] ^ polinomio[i]);
-        }
-        return resultado;
-    }*/
-
-    
-    private boolean[] dadoBitsHamming(boolean[] bits){
+    private boolean[] dadoBitsHamming(boolean[] bits) {
 
         boolean h1, h2, h3, h4;
         int n = 0;
         boolean[] dadoHamming = new boolean[12];
 
-        for(int i = 1; i <= 12; i++){
-            if(i == 1 || i == 2 || i == 4 || i == 8 ){
-                dadoHamming[i-1] = false;
-            }else{
-                dadoHamming[i-1] = bits[n];
+        for (int i = 1; i <= 12; i++) {
+            if (i == 1 || i == 2 || i == 4 || i == 8) {
+                dadoHamming[i - 1] = false;
+            } else {
+                dadoHamming[i - 1] = bits[n];
                 n++;
             }
         }
@@ -214,30 +118,78 @@ public class Transmissor {
 
         return dadoHamming;
     }
-    
-    public void enviaDado(){
+
+    public void enviaDado() {
 
         System.out.println("Enviando dado...");
 
         boolean[] dado;
 
         //percorre cada letra da mensagem
-        for(int i = 0; i < this.mensagem.length();i++){
-            do{
+        for (int i = 0; i < this.mensagem.length(); i++) {
+            do {
                 //Separa os caracteres por index e retorna em bits
                 boolean[] bits = streamCaracter(this.mensagem.charAt(i));
 
-                if(this.tecnica == Estrategia.CRC){
-                  dado =  dadoBitsCRC(bits);
-                }else{
-                  dado =  dadoBitsHamming(bits);
+                if (this.tecnica == Estrategia.CRC) {
+                    dado = dadoBitsCRC(bits);
+                } else {
+                    dado = dadoBitsHamming(bits);
                 }
 
                 //enviando a mensagem "pela rede" para o receptor (uma forma de testarmos esse método)
                 this.canal.enviarDado(dado);
             }
-            while(this.canal.recebeFeedback() == false);
+            while (this.canal.recebeFeedback() == false);
             //o que faremos com o indicador quando houver algum erro? qual ação vamos tomar com o retorno do receptor
         }
     }
+
+    private boolean[] dadoBitsCRC(boolean[] bits) {
+        boolean[] dadoComZeros = new boolean[12];
+
+        // Copia os 8 bits de dados
+        for (int i = 0; i < 8; i++) {
+            dadoComZeros[i] = bits[i];
+        }
+
+        // Acrescenta 4 zeros à direita (para o cálculo do CRC)
+        for (int i = 8; i < 12; i++) {
+            dadoComZeros[i] = false;
+        }
+
+        boolean[] polinomio = {true, true, false, false, false};
+        boolean[] registrador = new boolean[5];
+
+        // Início do processo CRC: percorre todos os bits do dado estendido
+        for (int i = 0; i < 12; i++) {
+
+            // Desloca os bits para a esquerda no registrador
+            for (int j = 0; j < 4; j++) {
+                registrador[j] = registrador[j + 1];
+            }
+
+            // Adiciona o próximo bit da sequência
+            registrador[4] = dadoComZeros[i];
+
+            // Se o primeiro bit (mais significativo) for 1, faz XOR com o polinômio
+            if (registrador[0]) {
+                for (int j = 0; j < 5; j++) {
+                    registrador[j] ^= polinomio[j];
+                }
+            }
+        }
+
+        // Monta o dado final: os 8 bits de dados + 4 bits do CRC (registrador)
+        boolean[] dadoFinal = new boolean[12];
+        for (int i = 0; i < 8; i++) {
+            dadoFinal[i] = bits[i];
+        }
+        for (int i = 0; i < 4; i++) {
+            dadoFinal[8 + i] = registrador[i + 1]; // ignora o bit 0 (mais significativo)
+        }
+
+        return dadoFinal;
+    }
 }
+
