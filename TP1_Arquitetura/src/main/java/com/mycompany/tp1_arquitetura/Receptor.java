@@ -215,7 +215,7 @@ public class Receptor {
             dado = decoficarDadoHammig(this.canal.recebeDado());
         }
         if(dado != null){
-           letra = decodificarDado(dado);
+            letra = decodificarDado(dado);
         }
 
         if(feedback){
