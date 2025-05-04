@@ -9,7 +9,7 @@ public class TP1_Arquitetura {
         //é necessário modificar as probabilidades e avaliar o desempenho
         Canal canal = new Canal(0.1);
 
-        File arquivo = new File("TP1_Arquitetura/src/main/resources/Moby Dick.txt");
+        File arquivo = new File("TP1_Arquitetura/src/main/resources/historia_10000_caracteres.txt");
         
         //Transmissor transm = new Transmissor("Teste:?*/", canal, Estrategia.CRC);
        Transmissor transm = new Transmissor(arquivo, canal,  Estrategia.CRC);
